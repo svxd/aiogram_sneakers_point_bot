@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-# Токен бота скрыт!
+# Токен бота скрыт!!
 bot = Bot(os.getenv('TOKEN'))
 # Инициализация бота
 dp = Dispatcher(bot=bot)
