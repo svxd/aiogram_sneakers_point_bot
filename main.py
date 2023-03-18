@@ -76,8 +76,7 @@ async def contacts(message: types.Message):
 # async def check_sticker(message: types.Message):
 #     await message.answer(message.sticker.file_id)
 #     await bot.send_message(message.from_user.id, message.chat.id)
-#
-#
+
 # # Фильтр сообщений: Документ, фото
 # @dp.message_handler(content_types=['document', 'photo'])
 # async def forward_message(message: types.Message):
