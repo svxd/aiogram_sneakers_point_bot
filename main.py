@@ -1,5 +1,6 @@
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from app import keyboards as kb
+from app import database as db
 from dotenv import load_dotenv
 import os
 
@@ -10,23 +11,11 @@ bot = Bot(os.getenv('TOKEN'))
 # Инициализация бота
 dp = Dispatcher(bot=bot)
 
-# Клавиатура пользователя
-main = ReplyKeyboardMarkup(resize_keyboard=True)
-main.add('Каталог').add('Корзина').add('Контакты')
 
-# Клавиатура админа
-main_admin = ReplyKeyboardMarkup(resize_keyboard=True)
-main_admin.add('Каталог').add('Корзина').add('Контакты').add('Админ-панель')
-
-# Админ-панель
-admin_panel = ReplyKeyboardMarkup(resize_keyboard=True)
-admin_panel.add('Добавить товар').add('Удалить товар').add('Контакты').add('Сделать рассылку')
-
-
-catalog_list = InlineKeyboardMarkup(row_width=2)
-catalog_list.add(InlineKeyboardButton(text='Футболки', url='https://vk.com/rox1xd'),
-                 InlineKeyboardButton(text='Шорты', url='https://vk.com/rox1xd'),
-                 InlineKeyboardButton(text='Кроссовки', url='https://vk.com/rox1xd'))
+# Запуск database.py
+async def on_startup(_):
+    await db.db_start()
+    print('Бот успешно запущен!')
 
 
 # Приветствие
@@ -34,9 +23,9 @@ catalog_list.add(InlineKeyboardButton(text='Футболки', url='https://vk.c
 async def cmd_start(message: types.Message):
     await message.answer_sticker('CAACAgIAAxkBAAPQZBX7EgAB7S9CaYio99Qwqn0xH7KfAALYDwACSPJgSxX7xNp4dGuYLwQ')
     await message.answer(f'{message.from_user.first_name}, добро пожаловать в наш магазин кроссовок!',
-                         reply_markup=main)
+                         reply_markup=kb.main)
     if message.from_user.id == int(os.getenv('ADMIN_ID')):
-        await message.answer(f'Вы авторизовались как администратор!', reply_markup=main_admin)
+        await message.answer(f'Вы авторизовались как администратор!', reply_markup=kb.main_admin)
 
 
 @dp.message_handler(commands=['id'])
@@ -47,7 +36,7 @@ async def cmd_start(message: types.Message):
 # Кнопка: Каталог
 @dp.message_handler(text='Каталог')
 async def catalog(message: types.Message):
-    await message.answer(f'Каталог пуст!', reply_markup=catalog_list)
+    await message.answer(f'Каталог пуст!', reply_markup=kb.catalog_list)
 
 
 # Кнопка: Корзина
@@ -67,9 +56,10 @@ async def contacts(message: types.Message):
 @dp.message_handler(text='Админ-панель')
 async def contacts(message: types.Message):
     if message.from_user.id == int(os.getenv('ADMIN_ID')):
-        await message.answer(f'Вы вошли в админ-панель', reply_markup=admin_panel)
+        await message.answer(f'Вы вошли в админ-панель', reply_markup=kb.admin_panel)
     else:
         await message.reply('Я тебя не понимаю.')
+
 
 # Фильтр сообщений: Стикеры
 # @dp.message_handler(content_types=['sticker'])
@@ -90,4 +80,4 @@ async def answer(message: types.Message):
 
 
 if __name__ == '__main__':
-    executor.start_polling(dp)
+    executor.start_polling(dp, on_startup=on_startup)
